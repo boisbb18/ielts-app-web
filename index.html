@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset password — IELTS App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #F1EFE8;
+      color: #1A1A1A;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 32px 24px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #6B7280;
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1A1A1A;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #ECECF0;
+      border-radius: 12px;
+      font-size: 16px;
+      background: #F9FAFB;
+      margin-bottom: 16px;
+      transition: border-color 0.15s;
+    }
+
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #6C5DD3;
+      background: #FFFFFF;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #9CA3AF;
+      margin-top: -8px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #6C5DD3;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    button:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .message.error {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .message.success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .success-state {
+      text-align: center;
+    }
+
+    .success-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #9CA3AF;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="form-view">
+      <h1>Set a new password</h1>
+      <p class="subtitle">Enter your new password below to finish resetting your account.</p>
+
+      <form id="reset-form">
+        <label for="password">New password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="At least 8 characters"
+          minlength="8"
+          required
+          autocomplete="new-password"
+        />
+
+        <label for="confirm">Confirm password</label>
+        <input
+          type="password"
+          id="confirm"
+          name="confirm"
+          placeholder="Repeat new password"
+          minlength="8"
+          required
+          autocomplete="new-password"
+        />
+
+        <button type="submit" id="submit-btn">Reset password</button>
+
+        <div id="message" class="message" style="display: none;"></div>
+      </form>
+
+      <p class="footer">After resetting, return to the IELTS app and sign in with your new password.</p>
+    </div>
+
+    <div id="success-view" style="display: none;" class="success-state">
+      <div class="icon">✓</div>
+      <h1>Password reset</h1>
+      <p class="subtitle">Your password has been updated. Return to the IELTS app and sign in with your new password.</p>
+    </div>
+
+    <div id="error-view" style="display: none;" class="success-state">
+      <div class="icon">⚠️</div>
+      <h1>Reset link expired</h1>
+      <p class="subtitle">This reset link is no longer valid. Please request a new one from the app.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://qgakghrnasgynnhsfjxk.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnYWtnaHJuYXNneW5uaHNmanhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5OTQ1NjQsImV4cCI6MjA5NDU3MDU2NH0.jj-LKSQOvAgvdm4VLOOL_02sUWxAfgp0DGhkV65TSno';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const formView = document.getElementById('form-view');
+    const successView = document.getElementById('success-view');
+    const errorView = document.getElementById('error-view');
+    const form = document.getElementById('reset-form');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm');
+    const submitBtn = document.getElementById('submit-btn');
+    const messageBox = document.getElementById('message');
+
+    // Supabase puts the recovery token in the URL hash (#access_token=...&type=recovery)
+    // The supabase-js client reads this automatically on init.
+    // We just need to confirm the user has a valid session before showing the form.
+
+    let sessionReady = false;
+
+    async function init() {
+      // Check if Supabase parsed a session from the URL hash
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error || !data.session) {
+        // No valid session — the link is bad or expired
+        formView.style.display = 'none';
+        errorView.style.display = 'block';
+        return;
+      }
+
+      sessionReady = true;
+    }
+
+    function showMessage(text, type) {
+      messageBox.textContent = text;
+      messageBox.className = 'message ' + type;
+      messageBox.style.display = 'block';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!sessionReady) {
+        showMessage('Reset link is not valid. Please request a new one.', 'error');
+        return;
+      }
+
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+
+      if (password.length < 8) {
+        showMessage('Password must be at least 8 characters.', 'error');
+        return;
+      }
+
+      if (password !== confirm) {
+        showMessage('Passwords do not match.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Resetting...';
+      messageBox.style.display = 'none';
+
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Reset password';
+        showMessage(error.message || 'Could not reset password. Try again.', 'error');
+        return;
+      }
+
+      // Success — switch views
+      formView.style.display = 'none';
+      successView.style.display = 'block';
+    });
+
+    init();
+  </script>
+</body>
+</html>
